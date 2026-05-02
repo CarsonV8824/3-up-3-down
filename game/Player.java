@@ -8,7 +8,13 @@ public class Player {
     private ArrayList<Card> bottomCards;
 
     public Player() {
-        this.handCards = handCards;
+        this.handCards = new ArrayList<Card>();
+        this.topCards = new ArrayList<Card>();
+        this.bottomCards = new ArrayList<Card>();
+    }
+
+    public void addStartCards(Card card) {
+        this.handCards.add(card);
     }
 
 }
