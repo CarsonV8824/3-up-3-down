@@ -2,6 +2,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.SwingUtilities;
+import java.awt.Component;
 
 import componets.*;
 import game.Loop;
@@ -17,8 +18,10 @@ public class Main {
             Loop gameLoop = new Loop();
             gameLoop.initGame(4);  // Initialize game with 4 players
             PlayerText playerDisplay = new PlayerText();
+            playerDisplay.setAlignmentX(Component.CENTER_ALIGNMENT);
             panel.add(playerDisplay);
             DrawButton drawButton = new DrawButton(gameLoop, playerDisplay);
+            drawButton.setAlignmentX(Component.CENTER_ALIGNMENT);
             panel.add(drawButton);
             
             frame.add(panel);
