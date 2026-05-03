@@ -67,4 +67,8 @@ public class Loop {
         }
         System.out.println(this.currentIndex);
     }
+
+    public int getIndex(){
+        return this.currentIndex;
+    }
 }

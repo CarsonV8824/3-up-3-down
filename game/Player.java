@@ -23,4 +23,8 @@ public class Player {
         return this.handCards;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
 }

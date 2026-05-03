@@ -16,8 +16,10 @@ public class Main {
 
             Loop gameLoop = new Loop();
             gameLoop.initGame(4);  // Initialize game with 4 players
-            TurnButton turnbutton = new TurnButton(gameLoop);
-            panel.add(turnbutton);
+            PlayerText playerDisplay = new PlayerText();
+            panel.add(playerDisplay);
+            DrawButton drawButton = new DrawButton(gameLoop, playerDisplay);
+            panel.add(drawButton);
             
             frame.add(panel);
             frame.setSize(1000, 600);

@@ -1,0 +1,14 @@
+package componets;
+
+import javax.swing.JButton;
+import game.Loop;
+
+public class DrawButton extends JButton{
+    public DrawButton(Loop loop, PlayerText playerText) {
+        super("Next Turn");
+        this.addActionListener(e -> {
+            loop.nextTurn();
+            playerText.updatePlayerDisplay(loop.playerList.get(loop.currentIndex).getName());
+        });
+    }
+}
