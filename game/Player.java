@@ -27,4 +27,12 @@ public class Player {
         return this.name;
     }
 
+    public void addTopCard(Card c) {
+        this.topCards.add(c);
+    }
+
+    public void addBottomCard(Card c) {
+        this.bottomCards.add(c);
+    }
+
 }
