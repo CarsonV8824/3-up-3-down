@@ -8,4 +8,12 @@ public class Card {
         this.color = c;
         this.symbol = s;
     }
+
+    public String getColor(){
+        return this.color;
+    }
+
+    public String getSymbol(){
+        return this.symbol;
+    }
 }

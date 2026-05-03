@@ -15,7 +15,7 @@ public class Player {
         this.bottomCards = new ArrayList<Card>();
     }
 
-    public void addStartCards(Card card) {
+    public void addStartCard(Card card) {
         this.handCards.add(card);
     }
 
