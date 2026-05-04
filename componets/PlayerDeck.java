@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import game.Card;
 
-public class PlayerDeck extends JComboBox{
+public class PlayerDeck extends JComboBox<String>{
     private ArrayList<Card> currentPlayerHand;
     
     public PlayerDeck() {

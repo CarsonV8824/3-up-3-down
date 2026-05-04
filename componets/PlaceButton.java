@@ -6,6 +6,7 @@ public class PlaceButton extends JButton{
 
     public PlaceButton() {
         super("Place Card");
+        this.addActionListener(actionListener);
     }
     
 }
