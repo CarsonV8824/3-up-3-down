@@ -1,5 +1,11 @@
 package componets;
 
-public class PlaceButton {
+import javax.swing.JButton;
+
+public class PlaceButton extends JButton{
+
+    public PlaceButton() {
+        super("Place Card");
+    }
     
 }

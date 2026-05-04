@@ -5,7 +5,7 @@ import game.Loop;
 
 public class DrawButton extends JButton{
     public DrawButton(Loop loop, PlayerText playerText) {
-        super("Next Turn");
+        super("Draw Pile");
         this.addActionListener(e -> {
             loop.nextTurn();
             playerText.updatePlayerDisplay(loop.playerList.get(loop.currentIndex).getName());
