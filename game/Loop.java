@@ -7,11 +7,13 @@ public class Loop {
     public ArrayList<Player> playerList;
     public ArrayList<Card> initCards;
     public Integer currentIndex;
+    public boolean isInitCardsDown;
     
     public Loop() {
         this.playerList = new ArrayList<Player>();
         this.initCards = new ArrayList<Card>();
         this.currentIndex = 0;
+        this.isInitCardsDown = true;
         this.initializeCards();
     }
 
@@ -50,13 +52,19 @@ public class Loop {
             this.playerList.add(new Player("Player " + playerNum));
         }
         for (int i=0; i< this.playerList.size();i++) {
-            Random rand = new Random();
-            int index = rand.nextInt(this.initCards.size());
-            Card tempCard = this.initCards.remove(index);
-            Player p = this.playerList.get(i);
-            p.addStartCard(tempCard);
+            for (int j=0; j < 9; j++) {
+                Random rand = new Random();
+                int index = rand.nextInt(this.initCards.size());
+                Card tempCard = this.initCards.remove(index);
+                Player p = this.playerList.get(i);
+                p.addStartCard(tempCard);
+            }
         }
+
+        
+            
     }
+
 
     public void nextTurn(){
         if (this.currentIndex >= this.playerList.size() - 1){
@@ -70,5 +78,9 @@ public class Loop {
 
     public int getIndex(){
         return this.currentIndex;
+    }
+
+    public Player getPlayer() {
+        return this.playerList.get(this.currentIndex);
     }
 }
