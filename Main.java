@@ -5,6 +5,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import java.awt.Component;
 
 import componets.*;
@@ -13,10 +14,12 @@ import game.Player;
 import game.Card;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.lang.Exception;
 
 public class Main {
     private static int currentPlayerSetupIndex = 0;
+    public static final String[] symbols = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Clear", "Clear +1", "Clear +2"};
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("3 Up 3 Down - Card Setup");
@@ -99,9 +102,14 @@ public class Main {
                 return;
             }
 
-            // Add selected cards to player's topCards 
+            // Add selected cards to player's topCards and remove from hand
             for (int idx : topIndices) {
                 currentPlayer.addTopCard(handCards.get(idx));
+            }
+            
+            // Remove in reverse order to avoid index shifting
+            for (int i = topIndices.size() - 1; i >= 0; i--) {
+                handCards.remove((int) topIndices.get(i));
             }
 
             // Move to next player or finish setup
@@ -136,15 +144,33 @@ public class Main {
         deckLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(deckLabel);
 
+        for (Card card : gameLoop.playedCards) {
+            String symbolText = card.getSymbol();
+            JLabel symText = new JLabel(symbolText);
+            symText.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panel.add(symText);
+        }
+
         DrawButton drawButton = new DrawButton(gameLoop, playerDisplay);
         drawButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(drawButton);
 
+
+        ArrayList<String> items = new ArrayList<>();
+        Player currentPlayer = gameLoop.getPlayer();
+        
+        ArrayList<Card> playerCards = currentPlayer.getCards();
+        for (Card card : playerCards) { 
+            items.add(card.getColor() + " " + card.getSymbol());
+        }
+        JComboBox<String> selectedCardToPlay = new JComboBox<String>(items.toArray(new String[0]));
+        selectedCardToPlay.setMaximumSize(selectedCardToPlay.getPreferredSize());
+        selectedCardToPlay.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(selectedCardToPlay);
+
         PlaceButton placeButton = new PlaceButton();
         placeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(placeButton);
-
-        
 
         drawButton.addActionListener(e -> {
             gameLoop.nextTurn();
@@ -153,14 +179,21 @@ public class Main {
         });
 
         placeButton.addActionListener(e -> {
-            try {
-                Card highestCard = gameLoop.playedCards.get(-1);
-                Card selectedCard;
-                Integer highestNum = Integer.parseInt(highestCard.getSymbol());
-            } catch (Exception exc) {
-                return;
-            }
             
+            if (gameLoop.initCards.size() > 0) {
+                Random rand = new Random();
+                int index = rand.nextInt(gameLoop.initCards.size());
+                Card choosenCard = gameLoop.initCards.remove(index);
+                currentPlayer.addHandCard(choosenCard);
+            } else { 
+
+            }
+
+            String selectedCard = (String) selectedCardToPlay.getSelectedItem();
+            String[] colorAndSymbol = selectedCard.split(" ", 2);
+            currentPlayer.removeCardFromHand(colorAndSymbol[0], colorAndSymbol[1]);
+            gameLoop.playedCards.add(new Card(colorAndSymbol[0], colorAndSymbol[1]));
+
             gameLoop.nextTurn();
             playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
             showGamePlay(frame, gameLoop);
@@ -169,5 +202,14 @@ public class Main {
         frame.add(panel);
         frame.getContentPane().revalidate();
         frame.getContentPane().repaint();
+    }
+
+    public static int getSymbolIndex(String symbol) {
+        for (int i = 0; i < symbols.length; i++) {
+            if (symbols[i].equals(symbol)) {
+                return i;
+            }
+        }
+        return -1;  // Return -1 if not found
     }
 }
