@@ -6,12 +6,14 @@ import java.util.Random;
 public class Loop {
     public ArrayList<Player> playerList;
     public ArrayList<Card> initCards;
+    public ArrayList<Card> playedCards;
     public Integer currentIndex;
     public boolean isInitCardsDown;
     
     public Loop() {
         this.playerList = new ArrayList<Player>();
         this.initCards = new ArrayList<Card>();
+        this.playedCards = new ArrayList<Card>();
         this.currentIndex = 0;
         this.isInitCardsDown = true;
         this.initializeCards();
@@ -52,17 +54,22 @@ public class Loop {
             this.playerList.add(new Player("Player " + playerNum));
         }
         for (int i=0; i< this.playerList.size();i++) {
-            for (int j=0; j < 9; j++) {
+            for (int j=0; j < 6; j++) {
                 Random rand = new Random();
                 int index = rand.nextInt(this.initCards.size());
                 Card tempCard = this.initCards.remove(index);
                 Player p = this.playerList.get(i);
                 p.addStartCard(tempCard);
             }
-        }
 
-        
-            
+            for (int j=0; j<3; j++) {
+                Random rand = new Random();
+                int index = rand.nextInt(this.initCards.size());
+                Card tempCard = this.initCards.remove(index);
+                Player p = this.playerList.get(i);
+                p.addBottomCard(tempCard);
+            }
+        }
     }
 
 

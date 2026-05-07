@@ -13,16 +13,16 @@ import game.Player;
 import game.Card;
 
 import java.util.ArrayList;
+import java.lang.Exception;
 
 public class Main {
     private static int currentPlayerSetupIndex = 0;
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("3 Up 3 Down - Card Setup");
 
             Loop gameLoop = new Loop();
-            gameLoop.initGame(4); // Initialize game with 4 players
+            gameLoop.initGame(2); // Initialize game with 4 players
 
             if (gameLoop.isInitCardsDown) {
                 showCardSetup(frame, gameLoop);
@@ -74,22 +74,6 @@ public class Main {
 
         panel.add(new JLabel(""));
 
-        // Bottom Cards Section
-        JLabel bottomCardLabel = new JLabel("Select 3 Cards for BOTTOM:");
-        bottomCardLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(bottomCardLabel);
-
-        ArrayList<JCheckBox> bottomCheckboxes = new ArrayList<>();
-        for (int i = 0; i < handCards.size(); i++) {
-            Card card = handCards.get(i);
-            JCheckBox checkbox = new JCheckBox(card.getColor() + " - " + card.getSymbol());
-            checkbox.setAlignmentX(Component.LEFT_ALIGNMENT);
-            bottomCheckboxes.add(checkbox);
-            panel.add(checkbox);
-        }
-
-        panel.add(new JLabel(""));
-
         // Error label
         JLabel errorLabel = new JLabel("");
         errorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -107,14 +91,6 @@ public class Main {
                 }
             }
 
-            // Collect selected indices for bottom cards
-            ArrayList<Integer> bottomIndices = new ArrayList<>();
-            for (int i = 0; i < bottomCheckboxes.size(); i++) {
-                if (bottomCheckboxes.get(i).isSelected()) {
-                    bottomIndices.add(i);
-                }
-            }
-
             // Validate selections
             if (topIndices.size() != 3) {
                 errorLabel.setText("Please select exactly 3 cards for TOP");
@@ -123,29 +99,9 @@ public class Main {
                 return;
             }
 
-            if (bottomIndices.size() != 3) {
-                errorLabel.setText("Please select exactly 3 cards for BOTTOM");
-                frame.getContentPane().revalidate();
-                frame.getContentPane().repaint();
-                return;
-            }
-
-            // Check for overlap
-            for (int topIdx : topIndices) {
-                if (bottomIndices.contains(topIdx)) {
-                    errorLabel.setText("Same card cannot be in both TOP and BOTTOM");
-                    frame.getContentPane().revalidate();
-                    frame.getContentPane().repaint();
-                    return;
-                }
-            }
-
-            // Add selected cards to player's topCards and bottomCards
+            // Add selected cards to player's topCards 
             for (int idx : topIndices) {
                 currentPlayer.addTopCard(handCards.get(idx));
-            }
-            for (int idx : bottomIndices) {
-                currentPlayer.addBottomCard(handCards.get(idx));
             }
 
             // Move to next player or finish setup
@@ -172,12 +128,43 @@ public class Main {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         PlayerText playerDisplay = new PlayerText();
+        playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
         playerDisplay.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(playerDisplay);
+
+        JLabel deckLabel = new JLabel("Cards in pile:");
+        deckLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(deckLabel);
 
         DrawButton drawButton = new DrawButton(gameLoop, playerDisplay);
         drawButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(drawButton);
+
+        PlaceButton placeButton = new PlaceButton();
+        placeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(placeButton);
+
+        
+
+        drawButton.addActionListener(e -> {
+            gameLoop.nextTurn();
+            playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
+            showGamePlay(frame, gameLoop);
+        });
+
+        placeButton.addActionListener(e -> {
+            try {
+                Card highestCard = gameLoop.playedCards.get(-1);
+                Card selectedCard;
+                Integer highestNum = Integer.parseInt(highestCard.getSymbol());
+            } catch (Exception exc) {
+                return;
+            }
+            
+            gameLoop.nextTurn();
+            playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
+            showGamePlay(frame, gameLoop);
+        });
 
         frame.add(panel);
         frame.getContentPane().revalidate();
