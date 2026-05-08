@@ -16,7 +16,6 @@ import game.Card;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.lang.Exception;
 
 public class Main {
     private static int currentPlayerSetupIndex = 0;
@@ -130,6 +129,54 @@ public class Main {
         frame.getContentPane().repaint();
     }
 
+    private static void playAdditionalCards(Player player, Loop gameLoop, int numCards, JFrame frame) {
+        for (int i = 0; i < numCards; i++) {
+            ArrayList<Card> playerCards = player.getCards();
+            ArrayList<String> items = new ArrayList<>();
+            
+            for (Card card : playerCards) {
+                items.add(card.getColor() + " " + card.getSymbol());
+            }
+            
+            if (items.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "No cards left to play!", "No Cards", JOptionPane.INFORMATION_MESSAGE);
+                break;
+            }
+            
+            String selectedCard = (String) JOptionPane.showInputDialog(
+                frame,
+                "Play additional card " + (i + 1) + " of " + numCards + ":",
+                "Additional Card",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                items.toArray(new String[0]),
+                items.get(0)
+            );
+            
+            if (selectedCard == null) {
+                break; // User cancelled
+            }
+            
+            String[] colorAndSymbol = selectedCard.split(" ", 2);
+            int currentCardSymbolIndex = gameLoop.getSymbolIndex(colorAndSymbol[1]);
+            
+            // Check if card is higher than the last played card
+            if (gameLoop.playedCards.size() > 0) {
+                Card lastCard = gameLoop.playedCards.get(gameLoop.playedCards.size() - 1);
+                int lastCardSymbolIndex = gameLoop.getSymbolIndex(lastCard.getSymbol());
+                
+                if (currentCardSymbolIndex <= lastCardSymbolIndex) {
+                    JOptionPane.showMessageDialog(frame, "Your card must be higher than the last played card!", "Invalid Card", JOptionPane.WARNING_MESSAGE);
+                    i--; // Retry this card
+                    continue;
+                }
+            }
+            
+            player.removeCardFromHand(colorAndSymbol[0], colorAndSymbol[1]);
+            gameLoop.playedCards.add(new Card(colorAndSymbol[0], colorAndSymbol[1]));
+        }
+    }
+
     private static void showGamePlay(JFrame frame, Loop gameLoop) {
         frame.getContentPane().removeAll();
 
@@ -159,6 +206,16 @@ public class Main {
         for (Card card : playerCards) { 
             items.add(card.getColor() + " " + card.getSymbol());
         }
+        
+        // Check if player has cards to play
+        if (items.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Player has no cards! Skipping turn.", "No Cards", JOptionPane.INFORMATION_MESSAGE);
+            gameLoop.nextTurn();
+            playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
+            showGamePlay(frame, gameLoop);
+            return;
+        }
+        
         JComboBox<String> selectedCardToPlay = new JComboBox<String>(items.toArray(new String[0]));
         selectedCardToPlay.setMaximumSize(selectedCardToPlay.getPreferredSize());
         selectedCardToPlay.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -171,6 +228,13 @@ public class Main {
         placeButton.addActionListener(e -> {
 
             String selectedCard = (String) selectedCardToPlay.getSelectedItem();
+            
+            // Safety check
+            if (selectedCard == null || selectedCard.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Please select a card to play!", "No Card Selected", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
             String[] colorAndSymbol = selectedCard.split(" ", 2);
 
             String symbol = colorAndSymbol[1];
@@ -183,8 +247,11 @@ public class Main {
                 for (Card card : cards) {
                     currentPlayer.addHandCard(card);
                 }
-                
+                gameLoop.nextTurn();
+                playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
+                showGamePlay(frame, gameLoop);
                 return;
+                
             }
             
             // Check if card symbol is higher than the last played card
@@ -207,11 +274,18 @@ public class Main {
 
             switch (symbol) {
                 case "Clear":
-                    gameLoop.clearAllPlayedCards();
-                case "Clear + 1":
-                    gameLoop.clearAllPlayedCards();
-                case "Clear + 2":
-                    gameLoop.clearAllPlayedCards();
+                    gameLoop.clearAndGetAllPlayedCards();
+                    break;
+                case "Clear +1":
+                    gameLoop.clearAndGetAllPlayedCards();
+                    // Allow playing 1 additional card
+                    playAdditionalCards(currentPlayer, gameLoop, 1, frame);
+                    break;
+                case "Clear +2":
+                    gameLoop.clearAndGetAllPlayedCards();
+                    // Allow playing 2 additional cards
+                    playAdditionalCards(currentPlayer, gameLoop, 2, frame);
+                    break;
             }
             
             if (gameLoop.initCards.size() > 0) {
