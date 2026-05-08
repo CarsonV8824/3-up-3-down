@@ -53,7 +53,12 @@ public class Player {
         return null;
     }
 
-    public int getSymbolIndex(String symbol) {
+    private int getSymbolIndex(String symbol) {
+        // Treat all Clear variants as the same ranking
+        if (symbol.startsWith("Clear")) {
+            return 10;  // All Clear variants have the same index
+        }
+        
         for (int i = 0; i < symbols.length; i++) {
             if (symbols[i].equals(symbol)) {
                 return i;
@@ -62,7 +67,7 @@ public class Player {
     return -1;  // Return -1 if not found
 }
 
-    public String getHighestSymbol() {
+    public int getHighestSymbol() {
         int highestIndex = 0;
         int tempIndex;
         for (Card card : this.handCards) {
@@ -72,7 +77,7 @@ public class Player {
             }
             
         }
-        return symbols[highestIndex];
+        return highestIndex;
     }
 
 }

@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import java.awt.Component;
 
 import componets.*;
@@ -151,11 +152,6 @@ public class Main {
             panel.add(symText);
         }
 
-        DrawButton drawButton = new DrawButton(gameLoop, playerDisplay);
-        drawButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(drawButton);
-
-
         ArrayList<String> items = new ArrayList<>();
         Player currentPlayer = gameLoop.getPlayer();
         
@@ -172,13 +168,51 @@ public class Main {
         placeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(placeButton);
 
-        drawButton.addActionListener(e -> {
-            gameLoop.nextTurn();
-            playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
-            showGamePlay(frame, gameLoop);
-        });
-
         placeButton.addActionListener(e -> {
+
+            String selectedCard = (String) selectedCardToPlay.getSelectedItem();
+            String[] colorAndSymbol = selectedCard.split(" ", 2);
+
+            String symbol = colorAndSymbol[1];
+
+
+
+
+            if (currentPlayer.getHighestSymbol() < gameLoop.getHighestSymbolforPlaced()) {
+                ArrayList<Card> cards = gameLoop.clearAndGetAllPlayedCards();
+                for (Card card : cards) {
+                    currentPlayer.addHandCard(card);
+                }
+                
+                return;
+            }
+            
+            // Check if card symbol is higher than the last played card
+            if (gameLoop.playedCards.size() > 0) {
+                Card lastCard = gameLoop.playedCards.get(gameLoop.playedCards.size() - 1);
+                int currentCardSymbolIndex = gameLoop.getSymbolIndex(colorAndSymbol[1]);
+                int lastCardSymbolIndex = gameLoop.getSymbolIndex(lastCard.getSymbol());
+                
+                // Handle case where symbol is not found
+                if (currentCardSymbolIndex == -1 || lastCardSymbolIndex == -1) {
+                    JOptionPane.showMessageDialog(frame, "Error: Invalid card symbol!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                if (currentCardSymbolIndex <= lastCardSymbolIndex) {
+                    JOptionPane.showMessageDialog(frame, "Your card must be higher than the last played card!", "Invalid Card", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
+            switch (symbol) {
+                case "Clear":
+                    gameLoop.clearAllPlayedCards();
+                case "Clear + 1":
+                    gameLoop.clearAllPlayedCards();
+                case "Clear + 2":
+                    gameLoop.clearAllPlayedCards();
+            }
             
             if (gameLoop.initCards.size() > 0) {
                 Random rand = new Random();
@@ -189,8 +223,7 @@ public class Main {
 
             }
 
-            String selectedCard = (String) selectedCardToPlay.getSelectedItem();
-            String[] colorAndSymbol = selectedCard.split(" ", 2);
+            
             currentPlayer.removeCardFromHand(colorAndSymbol[0], colorAndSymbol[1]);
             gameLoop.playedCards.add(new Card(colorAndSymbol[0], colorAndSymbol[1]));
 
@@ -204,12 +237,4 @@ public class Main {
         frame.getContentPane().repaint();
     }
 
-    public static int getSymbolIndex(String symbol) {
-        for (int i = 0; i < symbols.length; i++) {
-            if (symbols[i].equals(symbol)) {
-                return i;
-            }
-        }
-        return -1;  // Return -1 if not found
-    }
 }

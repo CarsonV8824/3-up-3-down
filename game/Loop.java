@@ -9,6 +9,7 @@ public class Loop {
     public ArrayList<Card> playedCards;
     public Integer currentIndex;
     public boolean isInitCardsDown;
+    public final String[] symbols = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Clear", "Clear +1", "Clear +2"};
     
     public Loop() {
         this.playerList = new ArrayList<Player>();
@@ -90,4 +91,40 @@ public class Loop {
     public Player getPlayer() {
         return this.playerList.get(this.currentIndex);
     }
+
+    public int getSymbolIndex(String symbol) {
+        // Treat all Clear variants as the same ranking
+        if (symbol.startsWith("Clear")) {
+            return 10;  // All Clear variants have the same index
+        }
+        
+        for (int i = 0; i < symbols.length; i++) {
+            if (symbols[i].equals(symbol)) {
+                return i;
+            }
+        }
+    return -1;  // Return -1 if not found
+    }
+    public int getHighestSymbolforPlaced() {
+        int highestIndex = 0;
+        int tempIndex;
+        for (Card card : this.playedCards) {
+            tempIndex = getSymbolIndex(card.getSymbol());
+            if (tempIndex > highestIndex) {
+                highestIndex = tempIndex;
+            }
+        }
+        return highestIndex;
+    }
+
+    public ArrayList<Card> clearAndGetAllPlayedCards() {
+        ArrayList<Card> cardsToReturn = new ArrayList<>(this.playedCards);
+        this.playedCards.clear();
+        return cardsToReturn;
+    }
+
+    public void clearAllPlayedCards() {
+        this.playedCards.clear();
+    }
 }
+
