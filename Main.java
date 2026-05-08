@@ -251,7 +251,6 @@ public class Main {
                 playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
                 showGamePlay(frame, gameLoop);
                 return;
-                
             }
             
             // Check if card symbol is higher than the last played card
