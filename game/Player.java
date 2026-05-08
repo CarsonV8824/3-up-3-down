@@ -20,7 +20,7 @@ public class Player {
         this.handCards.add(card);
     }
 
-    public ArrayList<Card> getCards() {
+    public ArrayList<Card> getHandCards() {
         return this.handCards;
     }
 
@@ -78,6 +78,65 @@ public class Player {
             
         }
         return highestIndex;
+    }
+
+    public ArrayList<Card> getTopCards() {
+        return this.topCards;
+    }
+
+    public ArrayList<Card> getBottomCards() {
+        return this.bottomCards;
+    }
+
+    public Card removeCardFromTop(String color, String symbol) {
+        for (Card card : this.topCards) {
+            if (card.getSymbol().equals(symbol) && card.getColor().equals(color)) {
+                int index = this.topCards.lastIndexOf(card);
+                Card chosenCard = this.topCards.get(index);
+                this.topCards.remove(index);
+                return chosenCard;
+            }
+        }
+        return null;
+    }
+
+    public Card removeCardFromBottom(String color, String symbol) {
+        for (Card card : this.bottomCards) {
+            if (card.getSymbol().equals(symbol) && card.getColor().equals(color)) {
+                int index = this.bottomCards.lastIndexOf(card);
+                Card chosenCard = this.bottomCards.get(index);
+                this.bottomCards.remove(index);
+                return chosenCard;
+            }
+        }
+        return null;
+    }
+
+    public boolean hasWon() {
+        return this.handCards.isEmpty() && this.topCards.isEmpty() && this.bottomCards.isEmpty();
+    }
+
+    public String getCurrentPlayingPhase() {
+        if (!this.handCards.isEmpty()) {
+            return "HAND";
+        } else if (!this.topCards.isEmpty()) {
+            return "TOP";
+        } else if (!this.bottomCards.isEmpty()) {
+            return "BOTTOM";
+        } else {
+            return "NONE";
+        }
+    }
+
+    public ArrayList<Card> getAvailableCards() {
+        if (!this.handCards.isEmpty()) {
+            return this.handCards;
+        } else if (!this.topCards.isEmpty()) {
+            return this.topCards;
+        } else if (!this.bottomCards.isEmpty()) {
+            return this.bottomCards;
+        }
+        return new ArrayList<>();
     }
 
 }

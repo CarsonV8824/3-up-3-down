@@ -52,7 +52,7 @@ public class Main {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         Player currentPlayer = gameLoop.playerList.get(currentPlayerSetupIndex);
-        ArrayList<Card> handCards = currentPlayer.getCards();
+        ArrayList<Card> handCards = currentPlayer.getHandCards();
 
         // Title
         JLabel titleLabel = new JLabel("Player " + (currentPlayerSetupIndex + 1) + " - Select 3 Cards for Top and 3 for Bottom");
@@ -131,7 +131,7 @@ public class Main {
 
     private static void playAdditionalCards(Player player, Loop gameLoop, int numCards, JFrame frame) {
         for (int i = 0; i < numCards; i++) {
-            ArrayList<Card> playerCards = player.getCards();
+            ArrayList<Card> playerCards = player.getAvailableCards();
             ArrayList<String> items = new ArrayList<>();
             
             for (Card card : playerCards) {
@@ -172,8 +172,36 @@ public class Main {
                 }
             }
             
-            player.removeCardFromHand(colorAndSymbol[0], colorAndSymbol[1]);
+            // Remove card from appropriate pile
+            String phase = player.getCurrentPlayingPhase();
+            boolean cardRemoved = false;
+            
+            if (phase.equals("HAND")) {
+                Card removed = player.removeCardFromHand(colorAndSymbol[0], colorAndSymbol[1]);
+                cardRemoved = (removed != null);
+            } else if (phase.equals("TOP")) {
+                Card removed = player.removeCardFromTop(colorAndSymbol[0], colorAndSymbol[1]);
+                cardRemoved = (removed != null);
+            } else if (phase.equals("BOTTOM")) {
+                Card removed = player.removeCardFromBottom(colorAndSymbol[0], colorAndSymbol[1]);
+                cardRemoved = (removed != null);
+            }
+            
+            if (!cardRemoved) {
+                JOptionPane.showMessageDialog(frame, "Error removing card!", "Error", JOptionPane.ERROR_MESSAGE);
+                i--; // Retry this card
+                continue;
+            }
+            
             gameLoop.playedCards.add(new Card(colorAndSymbol[0], colorAndSymbol[1]));
+            
+            // Draw a card if available
+            if (gameLoop.initCards.size() > 0 && player.getCurrentPlayingPhase() == "HAND") {
+                Random rand = new Random();
+                int index = rand.nextInt(gameLoop.initCards.size());
+                Card drawnCard = gameLoop.initCards.remove(index);
+                player.addHandCard(drawnCard);
+            }
         }
     }
 
@@ -183,8 +211,18 @@ public class Main {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
+        Player currentPlayer = gameLoop.getPlayer();
+
+        // Check if player has won
+        if (currentPlayer.hasWon()) {
+            JOptionPane.showMessageDialog(frame, currentPlayer.getName() + " WINS!", "Winner!", JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0);
+            return;
+        }
+
         PlayerText playerDisplay = new PlayerText();
-        playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
+        String phase = currentPlayer.getCurrentPlayingPhase();
+        playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName() + " - Playing: " + phase);
         playerDisplay.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(playerDisplay);
 
@@ -200,9 +238,9 @@ public class Main {
         }
 
         ArrayList<String> items = new ArrayList<>();
-        Player currentPlayer = gameLoop.getPlayer();
+
+        ArrayList<Card> playerCards = currentPlayer.getAvailableCards();
         
-        ArrayList<Card> playerCards = currentPlayer.getCards();
         for (Card card : playerCards) { 
             items.add(card.getColor() + " " + card.getSymbol());
         }
@@ -211,7 +249,6 @@ public class Main {
         if (items.isEmpty()) {
             JOptionPane.showMessageDialog(frame, "Player has no cards! Skipping turn.", "No Cards", JOptionPane.INFORMATION_MESSAGE);
             gameLoop.nextTurn();
-            playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
             showGamePlay(frame, gameLoop);
             return;
         }
@@ -239,16 +276,12 @@ public class Main {
 
             String symbol = colorAndSymbol[1];
 
-
-
-
             if (currentPlayer.getHighestSymbol() < gameLoop.getHighestSymbolforPlaced()) {
                 ArrayList<Card> cards = gameLoop.clearAndGetAllPlayedCards();
                 for (Card card : cards) {
                     currentPlayer.addHandCard(card);
                 }
                 gameLoop.nextTurn();
-                playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
                 showGamePlay(frame, gameLoop);
                 return;
             }
@@ -287,21 +320,37 @@ public class Main {
                     break;
             }
             
+            // Remove card from appropriate pile
+            String currentPhase = currentPlayer.getCurrentPlayingPhase();
+            boolean cardRemoved = false;
+            
+            if (currentPhase.equals("HAND")) {
+                Card removed = currentPlayer.removeCardFromHand(colorAndSymbol[0], colorAndSymbol[1]);
+                cardRemoved = (removed != null);
+            } else if (currentPhase.equals("TOP")) {
+                Card removed = currentPlayer.removeCardFromTop(colorAndSymbol[0], colorAndSymbol[1]);
+                cardRemoved = (removed != null);
+            } else if (currentPhase.equals("BOTTOM")) {
+                Card removed = currentPlayer.removeCardFromBottom(colorAndSymbol[0], colorAndSymbol[1]);
+                cardRemoved = (removed != null);
+            }
+            
+            if (!cardRemoved) {
+                JOptionPane.showMessageDialog(frame, "Error removing card!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            gameLoop.playedCards.add(new Card(colorAndSymbol[0], colorAndSymbol[1]));
+
+            // Draw a card if available
             if (gameLoop.initCards.size() > 0) {
                 Random rand = new Random();
                 int index = rand.nextInt(gameLoop.initCards.size());
-                Card choosenCard = gameLoop.initCards.remove(index);
-                currentPlayer.addHandCard(choosenCard);
-            } else { 
-
+                Card drawnCard = gameLoop.initCards.remove(index);
+                currentPlayer.addHandCard(drawnCard);
             }
 
-            
-            currentPlayer.removeCardFromHand(colorAndSymbol[0], colorAndSymbol[1]);
-            gameLoop.playedCards.add(new Card(colorAndSymbol[0], colorAndSymbol[1]));
-
             gameLoop.nextTurn();
-            playerDisplay.updatePlayerDisplay(gameLoop.playerList.get(gameLoop.currentIndex).getName());
             showGamePlay(frame, gameLoop);
         });
 
